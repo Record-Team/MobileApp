@@ -12,17 +12,17 @@ import { render } from 'react-dom';
 import { Router, Route, IndexRedirect, IndexRoute, browserHistory } from 'react-router';
 import { StoreProvider } from './Lib/Connectors';
 
-import Main from './Main'
-import MainActions from './Main/Actions'
 import Navbar from './Main/Navbar'
-import ListGroup from './Main/ListGroup'
 
+import PersonEntry from './Person/Entry'
 import PersonRegister from './Person/Register'
 import PersonLogin from './Person/Login'
 import PersonActions from './Person/Actions'
 
 import FundNew from './Fund/New'
+import FundItem from './Fund/Item'
 import FundList from './Fund/List'
+import AddContacts from './Fund/AddContacts'
 import FundActions from './Fund/Actions'
 
 const NavigationRoutes = {
@@ -31,12 +31,31 @@ const NavigationRoutes = {
         buttons: [
             { title: 'Новая цель', url: '/funds/new' }
         ]
-    }   
+    },
+    FundNew: {
+        title: 'Новая цель',
+        buttons: [
+            { title: 'Мои цели', url: '/funds' }
+        ]
+    },
+    FundItem: {
+        title: 'Цель',
+        buttons: [
+            { title: 'Мои цели', url: '/funds' },
+            { title: 'Добавить контакты', url: '/funds/addcontacts' }
+        ]
+    },
+    AddContacts: {
+        title: 'Добавление контактов',
+        buttons: [
+            { title: 'Мои цели', url: '/funds' }
+        ]
+    }
 }
 
 const Layout = props => <div className='container'>
     <div className='row'>
-        <Navbar {...props} {...NavigationRoutes[props.navigation]} />
+        <Navbar {...props} {...NavigationRoutes[props.children.props.route.navigation]} />
     </div>
     <div className='row'>
         <div className='col-md-12'>
@@ -59,12 +78,16 @@ render((
     <StoreProvider sagaCollections={[FundActions, PersonActions]}>
         <Router history={browserHistory}>
             <Route component={UnAuthorizedLayout}>
+                <Route path={`person`} component={PersonEntry} />
                 <Route path={`person/register`} component={PersonRegister} />
                 <Route path={`person/login`} component={PersonLogin} />
             </Route>
             <Route path={_ROOT_URL_} component={Layout}>
-                <Route path='/funds' component={FundList} navigation='Funds' />
-                <Route path='/funds/new' component={FundNew} navigation='NewFund' />
+                <Route path='funds' component={FundList} navigation='Funds' />
+                <Route path='funds/new' component={FundNew} navigation='FundNew' />
+                <Route path='funds/addcontacts' component={AddContacts} navigation='AddContacts' />
+                <Route path='funds/:FundID' component={FundItem} navigation='FundItem' />
+            
             </Route>
             <Route path='*' component={Error404} />
         </Router>

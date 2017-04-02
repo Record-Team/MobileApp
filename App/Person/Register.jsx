@@ -4,26 +4,46 @@ import { Connect } from '~/Lib/Connectors'
 @Connect('PERSON')
 export default class Register extends Component {
     render() {
-        return <form className="form-horizontal">
+        const {
+            dispatch,
+            PERSON: {
+                PersonName,
+                Identifier,
+            }
+         } = this.props;
+
+        return <form className="form-horizontal" onSubmit={e => {
+            e.preventDefault();
+            dispatch({ type: 'REGISTRATION_RERSON' });
+        }}>
             <fieldset>
                 <legend>Регистрация</legend>
                 <div className="form-group is-empty">
                     <div className="col-md-10">
-                        <input className="form-control" placeholder="ФИО" />
+                        <input
+                            value={PersonName}
+                            onChange={e => dispatch({ type: 'REGISTER_CHANGE_FORM', PersonName: e.target.value })}
+                            className="form-control" placeholder="ФИО" />
                     </div>
                 </div>
 
                 <div className="form-group is-empty">
                     <div className="col-md-10">
-                        <input className="form-control" placeholder="Логин" />
+                        <input
+                            value={Identifier}
+                            onChange={e => dispatch({ type: 'REGISTER_CHANGE_FORM', Identifier: e.target.value })}
+                            className="form-control" placeholder="Логин" />
                     </div>
                 </div>
 
                 <div className="form-group">
                     <div className="col-md-10 col-md-offset-2">
-                        <a href="javascript:void(0)" onClick={() => dispatch({ type: 'REGISTRATION_RERSON' })} className="btn btn-raised btn-success">
-                            OK<div className="ripple-container" />
-                        </a>
+                        <button
+                            disabled={!PersonName || !Identifier}
+                            type='submit'
+                            className="btn btn-raised btn-success">
+                            OK<div className="ripple-container"></div>
+                        </button>
                     </div>
                 </div>
             </fieldset>

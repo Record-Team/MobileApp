@@ -8,14 +8,14 @@ const PreapareParams = (inputParams, outputParams) => {
 }
 
 export function AuthApi({ url, queryParams = {}, outputParams = [], methodType = 'POST', showModalError = false }) {
-    return Fetch({ url: 'auth/' + url, queryParams });
+    return Fetch({ url: 'auth/' + url, queryParams, outputParams, methodType, showModalError });
 }
 
 export default function FetchApi({ url, queryParams = {}, outputParams = [], methodType = 'POST', showModalError = false }) {
     return Fetch({ url: 'api/' + url, queryParams, outputParams, methodType, showModalError })
 }
 
-function Fetch({ url, queryParams = {}, outputParams = [], methodType = 'POST', showModalError = false }) {
+function Fetch({ url, queryParams, outputParams, methodType, showModalError }) {
     var _method = methodType.toUpperCase();
     var _query = (_method === 'GET' && queryParams) ? ('?' + objToUrlParams(queryParams)) : '';
     var _url = _API_URL_ + url + _query;
