@@ -4,13 +4,18 @@ import { Connect } from '~/Lib/Connectors'
 @Connect('PERSON')
 export default class Register extends Component {
     render() {
-        const { dispatch, PERSON: { Identifier } } = this.props;
+        const { dispatch, PERSON: { Identifier, LoginError } } = this.props;
         return <form className="form-horizontal" onSubmit={e => {
             e.preventDefault();
             dispatch({ type: 'PERSON_LOGIN' });
         }}>
             <fieldset>
-                <legend>Вход</legend>
+                <legend
+                    style={{
+                        paddingTop: '50px',
+                        textAlign: 'center'
+                    }}
+                >Вход</legend>
                 <div className="form-group is-empty">
                     <div className="col-md-10">
                         <input
@@ -20,6 +25,10 @@ export default class Register extends Component {
                             className="form-control"
                             placeholder="Имя" />
                     </div>
+                        
+                    {LoginError && 
+                        <p style={{textAlign: 'center'}} className="text-warning">{LoginError}</p>
+                    }
                 </div>
 
                 <div className="form-group">
@@ -32,8 +41,9 @@ export default class Register extends Component {
                         </button>
                     </div>
                 </div>
+
             </fieldset>
 
-        </form>
+        </form >
     }
 }

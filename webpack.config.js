@@ -9,6 +9,7 @@ console.log('************' + (_IS_PROD_ ? 'PRODUCTION' : 'DEVELOPER') + '*******
 const _ROOT_URL_ = '';
 const _PROJECT_TITLE_ = 'fund-app';
 const _API_URL_ = 'http://localhost:8080/';
+// const _API_URL_ = 'http://10.0.2.2:8080/';//'http://localhost:8080/';
 
 const _ASSET_PATH_ = _ROOT_URL_ + '/static/'; //путь к ресурсам относительно домена (пример: http://localhost{ASSET_PATH}image.jpg)
 const _ROOT_URL_API_ = _ROOT_URL_ + '/api';
@@ -108,7 +109,7 @@ module.exports = {
 
             { test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff' },
             { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/octet-stream' },
-            { test: /\.(eot|png|ico|gif)(\?v=\d+\.\d+\.\d+)?$/, loader: 'file' },
+            { test: /\.(eot|png|ico|gif|jpg)(\?v=\d+\.\d+\.\d+)?$/, loader: 'file' },
             //{ test: /\.(jpe?g|gif)$/i, loader: 'url?limit=10000!img?progressive=true' },
             { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=image/svg+xml' }
         ]

@@ -45,7 +45,10 @@ function Fetch({ url, queryParams, outputParams, methodType, showModalError }) {
             }
             finally {
                 if (xhr.status === 200 && json) {
-                    resolve(json);
+                    if (!json.ResultOk)
+                        reject(new Error(json.ResultMessage));
+                    else
+                        resolve(json);
                 }
                 else {
                     reject(json);

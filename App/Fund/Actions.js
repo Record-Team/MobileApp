@@ -1,6 +1,6 @@
 import { browserHistory } from 'react-router';
 import { put, call, select } from 'redux-saga/effects'
-import { SagaCollection } from '~/Lib/SagaCollection'
+import { SagaCollection, callSync } from '~/Lib/SagaCollection'
 import FetchApi from '~/Lib/FetchApi'
 
 const NewFund = () => ({
@@ -13,6 +13,7 @@ export default (new SagaCollection('FUND', {
     IsFetching: true,
     FundList: [],
     FundItem: null,
+    ContactList: [],
     LoadingError: null,
     FundTypes: [],
     NewFund: NewFund(),
@@ -75,15 +76,15 @@ export default (new SagaCollection('FUND', {
         mapAction: () => ({ IsFetching: true, LoadingError: null }),
         saga: function* ({ FundID }) {
             try {
-                const { PersonID } = yield select(store => store['PERSON']);
-
-                const [FundResult, ContactResult] = yield [
-                    call(FetchApi, { url: 'API.FundGet', queryParams: { FundID, PersonID } }),//PersonID: 561360
-                    call(FetchApi, { url: 'API.FundContacts', queryParams: { FundID } })
-                ]
-                const FundItem = FundResult.Recordset && FundResult.Recordset[0];
-                const ContactList = ContactResult.Recordset || [];
-                yield put({ type: this.TYPE_SUCCESS, FundItem, ContactList, IsFetching: false, LoadingError: null })
+                // const { PersonID } = yield select(store => store['PERSON']);
+                const { type, PersonID } = yield callSync('GET_PERSON');
+                if (type !== 'GET_PERSON_SUCCESS') {
+                    yield put({ type: this.TYPE_FAILURE, LoadingError: 'Ошибка' });
+                    return;
+                }
+                const { Recordset: [FundItem] } = yield call(FetchApi, { url: 'API.FundGet', queryParams: { FundID, PersonID } })
+                const { Recordset: ContactList = [] } = yield call(FetchApi, { url: 'API.FundContacts', queryParams: { FundID, PersonID } })
+                yield put({ type: this.TYPE_SUCCESS, FundItem, ContactList, PersonID, IsFetching: false, LoadingError: null })
             }
             catch (e) {
                 yield put({ type: this.TYPE_FAILURE, IsFetching: false, LoadingError: e.message })
@@ -94,12 +95,67 @@ export default (new SagaCollection('FUND', {
         mapAction: () => ({ IsFetching: true, LoadingError: null }),
         saga: function* () {
             try {
-                const { PersonID } = yield select(store => store['PERSON']);
+                const { type, PersonID } = yield callSync('GET_PERSON');
+                if (type !== 'GET_PERSON_SUCCESS') {
+                    yield put({ type: this.TYPE_FAILURE, LoadingError: 'Ошибка' });
+                    return;
+                }
+
                 const { Recordset: PersonContacts } = yield call(FetchApi, { url: 'API.PersonContacts', queryParams: { PersonID } });
                 yield put({ type: this.TYPE_SUCCESS, PersonContacts, IsFetching: false, LoadingError: null })
             }
             catch (e) {
                 yield put({ type: this.TYPE_FAILURE, IsFetching: false, LoadingError: e.message })
+            }
+        }
+    })
+    .add('INVITE_SEND', {
+        saga: function* ({ InviteeID }) {
+            try {
+                let { FundItem: { FundID }, PersonID, ContactList } = yield select(store => store[this.componentName]);
+                const queryParams = { InviteeID, PersonID, FundID };
+                yield call(FetchApi, { url: 'API.InviteSend', queryParams });
+                ContactList = ContactList.map(x => x.PersonID === InviteeID ? { ...x, Invite: true } : x);
+
+                yield put({ type: this.TYPE_SUCCESS, ContactList, ErrorMessage: null })
+            }
+            catch (e) {
+                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message })
+            }
+        }
+    })
+    .add('INVITE_CLOSE', {
+        saga: function* ({ InviteeID }) {
+            try {
+                let { FundItem: { FundID }, PersonID, ContactList } = yield select(store => store[this.componentName]);
+                const queryParams = { InviteeID, PersonID, FundID };
+                yield call(FetchApi, { url: 'API.InviteClose', queryParams });
+                ContactList = ContactList.map(x => x.PersonID === InviteeID ? { ...x, Invite: false } : x);
+
+                yield put({ type: this.TYPE_SUCCESS, ContactList, ErrorMessage: null })
+            }
+            catch (e) {
+                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message })
+            }
+        }
+    })
+    .add('INVITE_ACCEPT', {
+        saga: function* () {
+            try {
+                const { type, PersonID } = yield callSync('GET_PERSON');
+                if (type !== 'GET_PERSON_SUCCESS') {
+                    yield put({ type: this.TYPE_FAILURE, LoadingError: 'Ошибка' });
+                    return;
+                }
+
+                let { FundItem: { FundID }, PersonID, ContactList } = yield select(store => store[this.componentName]);
+                const queryParams = { PersonID, FundID };
+                yield call(FetchApi, { url: 'API.InviteAccept', queryParams });
+                ContactList = ContactList.map(x => x.PersonID === InviteeID ? { ...x, Invite: false } : x);
+                yield put({ type: this.TYPE_SUCCESS, ContactList, ErrorMessage: null })
+            }
+            catch (e) {
+                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message })
             }
         }
     })

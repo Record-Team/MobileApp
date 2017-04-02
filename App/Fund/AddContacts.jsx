@@ -3,6 +3,11 @@ import { Link } from 'react-router'
 import { Connect } from '~/Lib/Connectors'
 import PreloadWrapper from '~/Lib/PreloadWrapper'
 
+const contactBtnStyle = {
+    padding: '0 0 0 0',
+    margin: '0 0 0 0'
+}
+
 @Connect('FUND')
 export default class AddContacts extends Component {
 
@@ -25,6 +30,7 @@ export default class AddContacts extends Component {
 
                         <div className="least-content">
                             <a
+                                style={contactBtnStyle}
                                 onClick={e => {
                                     e.preventDefault();
                                     dispatch({ type: 'INVITE_SEND' })

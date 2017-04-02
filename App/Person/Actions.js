@@ -17,7 +17,7 @@ export default (new SagaCollection('PERSON', {
                 yield put({ type: this.TYPE_SUCCESS, ...newForm })
             }
             catch (e) {
-                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message })
+                yield put({ type: this.TYPE_FAILURE })
             }
         }
     })
@@ -31,29 +31,35 @@ export default (new SagaCollection('PERSON', {
 
                 localStorage.setItem('PersonID', PersonID);
 
-                yield put({ type: this.TYPE_SUCCESS, IsAuthorized: true, PersonID })
+                yield put({ type: this.TYPE_SUCCESS, RegisterError: null, IsAuthorized: true, PersonID })
                 browserHistory.push('/funds');
             }
             catch (e) {
-                yield put({ type: this.TYPE_FAILURE, IsAuthorized: false })
+                console.log(e, e.message)
+                yield put({ type: this.TYPE_FAILURE, RegisterError: e.message, IsAuthorized: false })
             }
         }
     })
     .add('PERSON_LOGIN', {
+        mapAction: () => ({
+            LoginError: null
+        }),
         saga: function* () {
             try {
-
-                const { Idedntifier } = yield select(store => store[this.componentName]);
-                const queryParams = { Idedntifier }
+                const { Identifier } = yield select(store => store[this.componentName]);
+                const queryParams = { Identifier }
                 const outputParams = ['PersonID'];
-                const { Output: { PersonID } } = yield call(FetchApi, { url: 'API.PersonLogin', queryParams });
-
+                const { Output: { PersonID } } = yield call(FetchApi, { url: 'API.PersonLogin', queryParams, outputParams });
+                if (PersonID === undefined) {
+                    yield put({ type: this.TYPE_FAILURE, LoginError: 'Не верный логин', IsAuthorized: false })
+                    return
+                }
                 localStorage.setItem('PersonID', PersonID);
-
-                yield put({ type: this.TYPE_SUCCESS, PersonID, IsAuthorized: true })
+                yield put({ type: this.TYPE_SUCCESS, PersonID, LoginError: null, IsAuthorized: true })
+                browserHistory.push('/funds');
             }
             catch (e) {
-                yield put({ type: this.TYPE_FAILURE, IsAuthorized: false })
+                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message, LoginError: 'Не верный логин', IsAuthorized: false })
             }
         }
     })
@@ -61,7 +67,7 @@ export default (new SagaCollection('PERSON', {
         saga: function* () {
             try {
                 const PersonID = localStorage.getItem('PersonID');
-                if (!PersonID) {
+                if (!PersonID || PersonID === 'undefined') {
                     yield put({
                         type: this.TYPE_FAILURE,
                         PersonName: '',
@@ -70,13 +76,17 @@ export default (new SagaCollection('PERSON', {
                         IsAuthorized: false
                     });
                     browserHistory.push('/person');
+                    yield put({ type: this.TYPE_FAILURE, ErrorMessage: 'Не найден PersonID', IsAuthorized: false })
+                    return;
                 }
 
-                const { PersoneName, ID } = yield call(FetchApi, { url: 'API.FundListGet', queryParams: { id: 123 } });
-                yield put({ type: this.TYPE_SUCCESS, IsAuthorized: true, PersonName, ID })
+                const { Recordset } = yield call(FetchApi, { url: 'API.PersonGet', queryParams: { PersonID } });
+                const [{ PersonName }] = Recordset;
+
+                yield put({ type: this.TYPE_SUCCESS, IsAuthorized: true, PersonName, PersonID })
             }
             catch (e) {
-                yield put({ type: this.TYPE_FAILURE, IsAuthorized: false })
+                yield put({ type: this.TYPE_FAILURE, ErrorMessage: e.message, IsAuthorized: false })
             }
         }
     })

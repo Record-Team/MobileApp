@@ -9,6 +9,7 @@ export default class Register extends Component {
             PERSON: {
                 PersonName,
                 Identifier,
+                RegisterError,
             }
          } = this.props;
 
@@ -17,7 +18,12 @@ export default class Register extends Component {
             dispatch({ type: 'REGISTRATION_RERSON' });
         }}>
             <fieldset>
-                <legend>Регистрация</legend>
+                <legend
+                    style={{
+                        paddingTop: '50px',
+                        textAlign: 'center'
+                    }}
+                >Регистрация</legend>
                 <div className="form-group is-empty">
                     <div className="col-md-10">
                         <input
@@ -34,6 +40,10 @@ export default class Register extends Component {
                             onChange={e => dispatch({ type: 'REGISTER_CHANGE_FORM', Identifier: e.target.value })}
                             className="form-control" placeholder="Логин" />
                     </div>
+                       
+                    {RegisterError && 
+                        <p style={{textAlign: 'center'}} className="text-warning">{RegisterError}</p>
+                    }
                 </div>
 
                 <div className="form-group">

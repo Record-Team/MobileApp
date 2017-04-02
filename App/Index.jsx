@@ -26,6 +26,13 @@ import AddContacts from './Fund/AddContacts'
 import FundActions from './Fund/Actions'
 
 const NavigationRoutes = {
+    Person: {
+        title: 'SHARPAY',
+        buttons: [
+            { title: 'Регистрация', url: '/person/register' },
+            { title: 'Вход', url: '/person/login' }
+        ]
+    },
     Funds: {
         title: 'Цели',
         buttons: [
@@ -64,30 +71,20 @@ const Layout = props => <div className='container'>
     </div>
 </div>
 
-const UnAuthorizedLayout = props => <div className='container'>
-    <div className='row'>
-        <div className='col-md-12'>
-            {props.children}
-        </div>
-    </div>
-</div>
-
 const Error404 = () => <div><h4>Ошибка</h4><div>Что-то пошло не так</div></div>
 
 render((
     <StoreProvider sagaCollections={[FundActions, PersonActions]}>
         <Router history={browserHistory}>
-            <Route component={UnAuthorizedLayout}>
-                <Route path={`person`} component={PersonEntry} />
-                <Route path={`person/register`} component={PersonRegister} />
-                <Route path={`person/login`} component={PersonLogin} />
-            </Route>
-            <Route path={_ROOT_URL_} component={Layout}>
+            <Route path='/' component={Layout}>
+                <IndexRedirect to='person' />
+                <Route path={`person`} component={PersonEntry} navigation='Person' />
+                <Route path={`person/register`} component={PersonRegister} navigation='Person' />
+                <Route path={`person/login`} component={PersonLogin} navigation='Person' />
                 <Route path='funds' component={FundList} navigation='Funds' />
                 <Route path='funds/new' component={FundNew} navigation='FundNew' />
                 <Route path='funds/addcontacts' component={AddContacts} navigation='AddContacts' />
                 <Route path='funds/:FundID' component={FundItem} navigation='FundItem' />
-            
             </Route>
             <Route path='*' component={Error404} />
         </Router>
